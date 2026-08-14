@@ -1,0 +1,9 @@
+CREATE TABLE emp (
+    eid NUMBER(5) PRIMARY KEY,
+    ename VARCHAR2(30) NOT NULL,
+    deptno NUMBER(3),
+    deptname VARCHAR2(30),
+    gender VARCHAR2(10),
+    age NUMBER(3),
+    basicsal NUMBER(10, 2)
+);
