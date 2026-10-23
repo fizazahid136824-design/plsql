@@ -1,0 +1,27 @@
+1.write a pl/sql block that accepts an employee ID and displays an appropriate message when the employee does not exits 
+
+2.Create a user-defined exception LOW_SALARY and raise it when an empolyee's salary is below a specified amount
+
+3.create a user-defined exception INVALID_AGE and raise it when an employee's age is outsides the permitted range
+
+4.create a function that accepts monthly salary and returns annual salary
+
+5.create a function that accepts two numbers and returns the greater number
+
+6.create a function that accepts percentage and returns the corresponding grade
+
+7.create an EMP_AUDIT table and a trigger that stores employee details whenever a new employee is inserted
+
+8.create a trigger that stores the old and new salary whenever an employee's salary is updated
+
+9.create a trigger that stores deleted employee information in an audit table
+
+10.create a SALARY_HISTORY table and a trigger to store employee ID, old salary , new salary, and change date whenever salary is updated
+
+11.create a trigger that automatically records the insertion date user information whenever a new employee record is inserted
+
+12.create a stored function that accepts an employee's salary and returns the bouns amount
+
+13.create a trigger that prevents deletion of employee's belonging to a paricular department
+
+14.create a procedure that accepts a department number and returns the number of employee's through an OUT parameter
