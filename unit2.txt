@@ -1,0 +1,295 @@
+Part 1: Anonymous Blocks & User-Defined Exceptions
+
+
+1. Handle Non-Existent Employee
+This block uses the built-in NO_DATA_FOUND exception to catch missing IDs.
+sql
+DECLARE
+    v_emp_id   employees.employee_id%TYPE := &enter_employee_id;
+    v_emp_name employees.first_name%TYPE;
+BEGIN
+    SELECT first_name 
+    INTO v_emp_name 
+    FROM employees 
+    WHERE employee_id = v_emp_id;
+    
+    DBMS_OUTPUT.PUT_LINE('Employee Name: ' || v_emp_name);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Employee with ID ' || v_emp_id || ' does not exist.');
+END;
+/
+
+
+Use code with caution.
+
+
+2. User-Defined Exception: low_salary
+Raises an exception if the salary is below a threshold (e.g., less than 2000).
+sql
+DECLARE
+    v_emp_id     employees.employee_id%TYPE := &enter_employee_id;
+    v_salary     employees.salary%TYPE;
+    low_salary   EXCEPTION;
+BEGIN
+    SELECT salary INTO v_salary FROM employees WHERE employee_id = v_emp_id;
+    
+    IF v_salary < 2000 THEN
+        RAISE low_salary;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Salary is acceptable: ' || v_salary);
+    END IF;
+EXCEPTION
+    WHEN low_salary THEN
+        DBMS_OUTPUT.PUT_LINE('Exception Raised: Salary is below the specified minimum amount.');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Employee not found.');
+END;
+/
+
+
+Use code with caution.
+
+
+3. User-Defined Exception: invalid_age
+Checks if an employee's age falls outside the permitted range (e.g., 18 to 65).
+sql
+DECLARE
+    v_age       NUMBER := &enter_employee_age;
+    invalid_age EXCEPTION;
+BEGIN
+    IF v_age < 18 OR v_age > 65 THEN
+        RAISE invalid_age;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Age is valid: ' || v_age);
+    END IF;
+EXCEPTION
+    WHEN invalid_age THEN
+        DBMS_OUTPUT.PUT_LINE('Exception Raised: Age is outside the permitted range (18-65).');
+END;
+/
+
+
+Use code with caution.
+
+
+Part 2: Functions......
+
+
+4. Calculate Annual Salary
+sql
+CREATE OR REPLACE FUNCTION get_annual_salary (p_monthly_sal IN NUMBER) 
+RETURN NUMBER IS
+BEGIN
+    RETURN (NVL(p_monthly_sal, 0) * 12);
+END;
+/
+
+
+Use code with caution.
+
+
+5. Find Greater of Two Numbers
+sql
+CREATE OR REPLACE FUNCTION get_greater_num (p_num1 IN NUMBER, p_num2 IN NUMBER) 
+RETURN NUMBER IS
+BEGIN
+    IF p_num1 > p_num2 THEN
+        RETURN p_num1;
+    ELSE
+        RETURN p_num2;
+    END IF;
+END;
+/
+
+
+Use code with caution.
+
+
+6. Convert Percentage to Grade
+sql
+CREATE OR REPLACE FUNCTION get_grade (p_percentage IN NUMBER) 
+RETURN VARCHAR2 IS
+BEGIN
+    IF p_percentage >= 90 THEN RETURN 'A';
+    ELSIF p_percentage >= 80 THEN RETURN 'B';
+    ELSIF p_percentage >= 70 THEN RETURN 'C';
+    ELSIF p_percentage >= 60 THEN RETURN 'D';
+    ELSE RETURN 'F';
+    END IF;
+END;
+/
+
+
+Use code with caution.
+
+
+Part 3: Triggers & Audit Tables.....
+
+7. Audit Table & Trigger for New Insertions
+sql
+-- Audit Table setup
+CREATE TABLE emp_audit (
+    audit_id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id NUMBER,
+    first_name  VARCHAR2(50),
+    salary      NUMBER,
+    action_date DATE
+);
+
+-- Trigger
+CREATE OR REPLACE TRIGGER trg_emp_insert_audit
+AFTER INSERT ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO emp_audit (employee_id, first_name, salary, action_date)
+    VALUES (:NEW.employee_id, :NEW.first_name, :NEW.salary, SYSDATE);
+END;
+/
+
+
+Use code with caution.
+
+
+8. Track Old and New Salary Updates
+sql
+-- Setup generic audit table for updates
+CREATE TABLE salary_updates_log (
+    log_id      NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id NUMBER,
+    old_salary  NUMBER,
+    new_salary  NUMBER,
+    changed_at  DATE
+);
+
+-- Trigger
+CREATE OR REPLACE TRIGGER trg_track_salary_change
+AFTER UPDATE OF salary ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO salary_updates_log (employee_id, old_salary, new_salary, changed_at)
+    VALUES (:OLD.employee_id, :OLD.salary, :NEW.salary, SYSDATE);
+END;
+/
+
+
+Use code with caution.
+
+
+9. Audit Log for Deleted Employees
+sql
+-- Deleted history table setup
+CREATE TABLE emp_deleted_audit (
+    employee_id   NUMBER,
+    first_name    VARCHAR2(50),
+    last_name     VARCHAR2(50),
+    deleted_by    VARCHAR2(50),
+    deletion_date DATE
+);
+
+-- Trigger
+CREATE OR REPLACE TRIGGER trg_emp_delete_audit
+AFTER DELETE ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO emp_deleted_audit (employee_id, first_name, last_name, deleted_by, deletion_date)
+    VALUES (:OLD.employee_id, :OLD.first_name, :OLD.last_name, USER, SYSDATE);
+END;
+/
+
+
+Use code with caution.
+
+
+10. Salary History Tracker
+sql
+-- Table setup
+CREATE TABLE salary_history (
+    employee_id NUMBER,
+    old_salary  NUMBER,
+    new_salary  NUMBER,
+    change_date DATE
+);
+
+-- Trigger 
+CREATE OR REPLACE TRIGGER trg_salary_history
+AFTER UPDATE OF salary ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO salary_history (employee_id, old_salary, new_salary, change_date)
+    VALUES (:OLD.employee_id, :OLD.salary, :NEW.salary, SYSDATE);
+END;
+/
+
+
+Use code with caution.
+
+
+11. Record System Metadata on Insert
+sql
+-- Assuming columns exist in your main table to track creation metadata
+-- If not, this logic can target an audit table instead.
+CREATE OR REPLACE TRIGGER trg_record_insert_meta
+BEFORE INSERT ON employees
+FOR EACH ROW
+BEGIN
+    :NEW.created_by   := USER;
+    :NEW.created_date := SYSDATE;
+END;
+/
+
+
+Use code with caution.
+
+
+12. Restrict Deletion for a Specific Department
+Prevents deletion of employees belonging to Department ID 10.
+sql
+CREATE OR REPLACE TRIGGER trg_prevent_dept_delete
+BEFORE DELETE ON employees
+FOR EACH ROW
+BEGIN
+    IF :OLD.department_id = 10 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Deletion of employees from Department 10 is strictly prohibited.');
+    END IF;
+END;
+/
+
+
+Use code with caution.
+
+
+Part 4: Stored Procedures & Advanced Functions....
+
+13. Stored Function for Bonus Calculation
+Calculates a 10% bonus if the salary is under 5000, otherwise 5%.
+sql
+CREATE OR REPLACE FUNCTION calculate_bonus (p_salary IN NUMBER) 
+RETURN NUMBER IS
+BEGIN
+    IF p_salary < 5000 THEN
+        RETURN p_salary * 0.10;
+    ELSE
+        RETURN p_salary * 0.05;
+    END IF;
+END;
+/
+
+
+Use code with caution.
+
+14. Procedure to Count Employees by Department
+sql
+CREATE OR REPLACE PROCEDURE get_emp_count_by_dept (
+    p_dept_id    IN  NUMBER,
+    p_emp_count  OUT NUMBER
+) IS
+BEGIN
+    SELECT COUNT(*) 
+    INTO p_emp_count 
+    FROM employees 
+    WHERE department_id = p_dept_id;
+END;
+/
+
+
