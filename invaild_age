@@ -1,0 +1,286 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.Scanner;
+class InsertStatement
+
+
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            Statement stmt=cn.createStatement();
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            String name;
+            System.out.print("Enter grno.");
+            grno=sc.nextInt();
+            sc.nextLine();
+            System.out.println("Enter name");
+            name=sc.nextLine();
+            
+            try
+            {
+                int x=stmt.executeUpdate("insert into stud values("+grno+",'"+name+"')");
+                System.out.println("No of row inserted:"+x);
+            }
+            catch(Exception e)
+            {
+                System.out.println("Exception:"+e);
+            }
+            cn.close();
+        }
+        catch (Exception e) 
+        { 
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+class DisplayStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            Statement stmt=cn.createStatement();
+            ResultSet rs=stmt.executeQuery("select * from stud");
+            while(rs.next())
+            {
+                System.out.println(rs.getInt("grno")+" "+rs.getString("name"));
+            }
+            cn.close();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.Scanner;
+class UpdateStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName ("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            Statement stmt=cn.createStatement();
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            String name ="";
+            System.out.print("Enter grno. to be updated");
+            grno=sc.nextInt();
+            System.out.println("Enter new name");
+            name=sc.next();
+            try {
+                int x=stmt.executeUpdate("Update stud set name='"+name+"'where grno="+grno);
+                System.out.println("No of Rows affected:"+x);
+                }
+            catch (Exception e)
+              {
+                System.out.println(e);
+              }
+              cn.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.Scanner;
+class DeleteStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName ("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            Statement stmt=cn.createStatement();
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            System.out.print("Enter grno. to be deleted");
+            grno=sc.nextInt();
+            
+            try {
+                int x=stmt.executeUpdate("delete from stud where grno="+grno);
+                System.out.println("No of Rows affected:"+x);
+                }
+            catch (Exception e)
+              {
+                System.out.println(e);
+              }
+              cn.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.Scanner;
+class InsertPreparedStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            String sql="insert into stud2 (grno,name) values (?,?)";
+            PreparedStatement pstmt=cn.prepareStatement(sql);
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            String name="";
+            System.out.print("Enter grno.");
+            grno=sc.nextInt();
+            System.out.println("Enter name");
+            name=sc.next();
+            pstmt.setInt(1,grno);
+            pstmt.setString(2,name);
+            int x=pstmt.executeUpdate();
+            System.out.println("No of row inserted:"+x);
+            cn.close();
+        }
+        catch (Exception e) 
+        { 
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+class DisplayPreparedStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            String sql="select * from stud2";
+            PreparedStatement pstmt=cn.prepareStatement(sql);
+            ResultSet rs=pstmt.executeQuery();
+            while(rs.next())
+            {
+                System.out.println(rs.getInt("grno")+" "+rs.getString("name"));
+            }
+            cn.close();
+
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.Scanner;
+class UpdatePreparedStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName ("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            String sql="update stud2 set name=? where grno=?";
+            PreparedStatement pstmt=cn.prepareStatement(sql);
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            String name ="";
+            System.out.print("Enter grno. to be updated");
+            grno=sc.nextInt();
+            System.out.println("Enter new name");
+            name=sc.next();
+
+            pstmt.setString(1,name);
+            pstmt.setInt(2,grno);
+            int x=pstmt.executeUpdate();
+            System.out.println("No of Rows affected:"+x);
+            
+              cn.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.Scanner;
+class DeletePreparedStatement
+{ 
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName ("com.mysql.cj.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3306/javadb","root","");
+            String sql="delete from stud2 where grno=?";
+            PreparedStatement pstmt=cn.prepareStatement(sql);
+            Scanner sc=new Scanner(System.in);
+            int grno = 0;
+            System.out.print("Enter grno. to be deleted");
+            grno=sc.nextInt();
+            pstmt.setInt(1,grno);
+            int x=pstmt.executeUpdate();
+            System.out.println("No of Rows affected:"+x);
+           
+              cn.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
